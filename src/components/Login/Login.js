@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import * as firebase from "firebase/app";
 import "firebase/auth";
 import firebaseConfig from './firebase.config';
+import { useContext } from 'react';
+import { UserContext } from '../../App';
+import { useHistory, useLocation } from 'react-router-dom';
 
 
 firebase.initializeApp(firebaseConfig);
@@ -72,6 +75,17 @@ function Login() {
         setUser(signOut);
       })
   }
+
+//   userContext
+
+  const [loggedInUser,setLoggedInUser] = useContext(UserContext);
+
+  let history = useHistory();
+  let location = useLocation();
+
+  let { from } = location.state || { from: { pathname: "/" } };
+
+//  submit button
   const handleSubmit = (e) => {
  
     if(newUser && user.email && user.password) {
@@ -81,6 +95,7 @@ function Login() {
         newUserInfo.error = '';
         newUserInfo.success = true;
         setUser(newUserInfo);
+        
         updateUserName(user.name)
         
       })
@@ -97,10 +112,12 @@ function Login() {
     if(!newUser && user.email && user.password) {
       firebase.auth().signInWithEmailAndPassword(user.email, user.password)
       .then(res => {
-        const newUserInfo = {...user};
+        var newUserInfo = {...user};
         newUserInfo.error = '';
         newUserInfo.success = true;
         setUser(newUserInfo);
+        setLoggedInUser(newUserInfo);
+        history.replace(from); 
       })
       .catch(function(error) {
         // Handle Errors here.
